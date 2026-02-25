@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  QuizView.swift
 //  SignWise
 //
 //  Created by Student on 25/02/26.
@@ -26,7 +26,7 @@ struct QuizView: View {
     
     var body: some View {
         ZStack {
-            Color(red: 0.05, green: 0.05, blue: 0.12)
+            Color.appBG
                 .ignoresSafeArea()
             
             if showResult {
@@ -39,20 +39,20 @@ struct QuizView: View {
                         HStack {
                             Text("Question \(currentIndex + 1) of \(signs.count)")
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(.appSubtext)
                             Spacer()
                             Text("Score: \(score)")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(.appAccent)
                         }
                         
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.white.opacity(0.1))
+                                .fill(Color.appAccent.opacity(0.1))
                                 .frame(height: 6)
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(LinearGradient(
-                                    colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.6, green: 0.4, blue: 1.0)],
+                                    colors: [Color.appAccent, Color.appAccent2],
                                     startPoint: .leading,
                                     endPoint: .trailing
                                 ))
@@ -65,7 +65,13 @@ struct QuizView: View {
                     // Sign Card
                     ZStack {
                         RoundedRectangle(cornerRadius: 24)
-                            .fill(Color.white.opacity(0.07))
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.appAccent, Color.appAccent2],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
                         
                         VStack(spacing: 12) {
                             Text("✋")
@@ -73,7 +79,7 @@ struct QuizView: View {
                             
                             Text("What does this sign mean?")
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.5))
+                                .foregroundColor(.white.opacity(0.8))
                             
                             Text(currentSign.handShape)
                                 .font(.system(size: 16, weight: .semibold))
@@ -83,7 +89,7 @@ struct QuizView: View {
                             
                             Text(currentSign.movement)
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundColor(.white.opacity(0.85))
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal)
                         }
@@ -91,6 +97,7 @@ struct QuizView: View {
                     }
                     .frame(height: 220)
                     .padding(.horizontal)
+                    .shadow(color: Color.appAccent.opacity(0.15), radius: 12, x: 0, y: 4)
                     
                     // Answer Options
                     VStack(spacing: 12) {
@@ -120,7 +127,7 @@ struct QuizView: View {
                                     Spacer()
                                     if selectedAnswer == option {
                                         Image(systemName: option == currentSign.word ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                            .foregroundColor(option == currentSign.word ? .green : .red)
+                                            .foregroundColor(option == currentSign.word ? Color(red: 0.08, green: 0.72, blue: 0.52) : Color(red: 0.92, green: 0.22, blue: 0.32))
                                     }
                                 }
                                 .padding(18)
@@ -158,24 +165,24 @@ struct QuizView: View {
     
     func optionBackground(_ option: String) -> Color {
         guard let selected = selectedAnswer else {
-            return Color.white.opacity(0.07)
+            return Color.appCard
         }
         if option == currentSign.word {
-            return Color.green.opacity(0.3)
+            return Color(red: 0.08, green: 0.72, blue: 0.52).opacity(0.15)
         }
         if option == selected {
-            return Color.red.opacity(0.3)
+            return Color(red: 0.92, green: 0.22, blue: 0.32).opacity(0.15)
         }
-        return Color.white.opacity(0.07)
+        return Color.appCard
     }
     
     func optionTextColor(_ option: String) -> Color {
         guard let selected = selectedAnswer else {
-            return .white
+            return .appText
         }
-        if option == currentSign.word { return .green }
-        if option == selected { return .red }
-        return .white.opacity(0.4)
+        if option == currentSign.word { return Color(red: 0.08, green: 0.72, blue: 0.52) }
+        if option == selected { return Color(red: 0.92, green: 0.22, blue: 0.32) }
+        return .appSubtext
     }
 }
 
@@ -208,17 +215,17 @@ struct ResultView: View {
             
             Text(message)
                 .font(.system(size: 32, weight: .black))
-                .foregroundColor(.white)
+                .foregroundColor(.appText)
             
             // Score Circle
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.1), lineWidth: 12)
+                    .stroke(Color.appAccent.opacity(0.15), lineWidth: 12)
                 Circle()
                     .trim(from: 0, to: CGFloat(percentage) / 100)
                     .stroke(
                         LinearGradient(
-                            colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.6, green: 0.4, blue: 1.0)],
+                            colors: [Color.appAccent, Color.appAccent2],
                             startPoint: .leading,
                             endPoint: .trailing
                         ),
@@ -229,13 +236,27 @@ struct ResultView: View {
                 VStack(spacing: 4) {
                     Text("\(score)/\(total)")
                         .font(.system(size: 36, weight: .black))
-                        .foregroundColor(.white)
+                        .foregroundColor(.appText)
                     Text("correct")
                         .font(.system(size: 14))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.appSubtext)
                 }
             }
             .frame(width: 160, height: 160)
+            
+            // Performance Message
+            VStack(spacing: 8) {
+                Text(percentage >= 70 ? "Excellent performance! 🌟" : "Keep practicing! 📖")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(.appAccent)
+                Text("\(percentage)% Accuracy")
+                    .font(.system(size: 14))
+                    .foregroundColor(.appSubtext)
+            }
+            .padding(16)
+            .background(Color.appCard)
+            .cornerRadius(14)
+            .padding(.horizontal)
             
             // Back Button
             Button {
@@ -248,17 +269,19 @@ struct ResultView: View {
                     .padding(.vertical, 18)
                     .background(
                         LinearGradient(
-                            colors: [Color(red: 0.4, green: 0.6, blue: 1.0), Color(red: 0.6, green: 0.4, blue: 1.0)],
+                            colors: [Color.appAccent, Color.appAccent2],
                             startPoint: .leading,
                             endPoint: .trailing
                         )
                     )
                     .cornerRadius(18)
                     .padding(.horizontal)
+                    .shadow(color: Color.appAccent.opacity(0.2), radius: 8, x: 0, y: 3)
             }
             
             Spacer()
         }
+        .background(Color.appBG.ignoresSafeArea())
     }
 }
 
