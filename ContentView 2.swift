@@ -62,6 +62,8 @@ struct HomeScreen: View {
                         VStack(spacing: 6) {
                             Text("✋")
                                 .font(.system(size: 52))
+                                .scaleEffect(1.0)
+                                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: UUID())
 
                             Text("SignWise")
                                 .font(.system(size: 36, weight: .black))
@@ -78,16 +80,16 @@ struct HomeScreen: View {
                         ProgressBanner()
                             .padding(.horizontal)
 
-                        // Categories
+                        // Categories with Animation
                         VStack(alignment: .leading, spacing: 14) {
                             Text("CATEGORIES")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(.appSubtext)
                                 .padding(.horizontal)
 
-                            ForEach(SignCategory.allCases, id: \.self) { category in
+                            ForEach(Array(SignCategory.allCases.enumerated()), id: \.element.self) { index, category in
                                 NavigationLink(destination: LearnView(category: category)) {
-                                    CategoryCard(category: category)
+                                    CategoryCard(category: category, index: index)
                                 }
                                 .padding(.horizontal)
                             }
@@ -147,9 +149,13 @@ struct ProgressBanner: View {
     }
 }
 
-// MARK: - Category Card
+// MARK: - Category Card (With Animations 🎉)
 struct CategoryCard: View {
     let category: SignCategory
+    let index: Int
+    
+    @State var isVisible: Bool = false
+    @State var isHovered: Bool = false
 
     var totalCount: Int { allSigns.filter { $0.category == category }.count }
     var learnedCount: Int {
@@ -172,12 +178,14 @@ struct CategoryCard: View {
     var body: some View {
         HStack(spacing: 16) {
 
-            // Emoji box
+            // Emoji box with BOUNCE animation 🎉
             Text(category.emoji)
                 .font(.system(size: 28))
                 .frame(width: 56, height: 56)
                 .background(accentColor.opacity(0.12))
                 .cornerRadius(16)
+                .scaleEffect(isVisible ? 1.0 : 0.3)
+                .opacity(isVisible ? 1 : 0)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(category.rawValue)
@@ -198,17 +206,39 @@ struct CategoryCard: View {
                 }
                 .frame(width: 160)
             }
+            .offset(y: isVisible ? 0 : 10)
+            .opacity(isVisible ? 1 : 0)
 
             Spacer()
 
+            // Chevron with HOVER animation
             Image(systemName: "chevron.right")
                 .foregroundColor(.appSubtext)
                 .font(.system(size: 13, weight: .semibold))
+                .offset(x: isHovered ? 4 : 0)
+                .scaleEffect(isHovered ? 1.2 : 1.0)
         }
         .padding(18)
         .background(Color.appCard)
         .cornerRadius(20)
-        .shadow(color: accentColor.opacity(0.08), radius: 8, x: 0, y: 3)
+        .shadow(
+            color: isHovered ? accentColor.opacity(0.2) : accentColor.opacity(0.08),
+            radius: isHovered ? 16 : 8,
+            x: 0,
+            y: isHovered ? 8 : 3
+        )
+        .scaleEffect(isHovered ? 1.02 : 1.0, anchor: .center)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isHovered = hovering
+            }
+        }
+        .onAppear {
+            // Bounce animation with stagger delay ⬆️
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.65).delay(Double(index) * 0.12)) {
+                isVisible = true
+            }
+        }
     }
 }
 
